@@ -128,6 +128,7 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
                 }
                 
                 memcpy(_packetBuffer, _inputBuffer, _packetSize);
+
                 _inputBuffer += _packetSize;
                 _inputSize -= _packetSize;
                 
@@ -172,7 +173,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
                 
                 //读取存量数据完成，释放
                 _remainingSize = 0;
-                
                 [_remainingData resetBytesInRange:NSMakeRange(0, _remainingData.length)];
                 [_remainingData setLength:0];
                 
