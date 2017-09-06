@@ -81,6 +81,9 @@
     av_free(_ctx);
 }
 
+/**
+ 初始化 各种参数
+ */
 - (void)setup {
     avcodec_register_all();     //注册编解码器
     av_init_packet(&_avpkt);     //初始化包结构
@@ -110,8 +113,12 @@
     _nDataLen = 0;
 }
 
-#pragma mark - decoding
-- (void)startDecoding:(void *)data_buffer length:(int)length {
+- (void)setDelegate:(id<TTVideoDecodingDelegate>)delegate {
+    _delegate = delegate;
+}
+
+#pragma mark - decode stream data
+- (void)decode:(void *)data_buffer length:(int)length {
     
     if (!data_buffer || length == 0) {
         return;

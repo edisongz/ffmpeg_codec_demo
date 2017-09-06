@@ -12,14 +12,15 @@
 
 #define FILE_BUF_SIZE       4096
 
-@interface ViewController () <TTVideoEncodingDelegate>
+@interface ViewController () <TTVideoDecodingDelegate>
 {
-    TTSwH264Decoder *_decoder;
-    TTHwH264Decoder *_hwDecoder;
+//    TTSwH264Decoder *_decoder;
+//    TTHwH264Decoder *_hwDecoder;
     
     uint8_t *_filebuf;        //读入文件缓存
 }
 
+@property (nonatomic, strong) id<TTVideoDecoding> decoder;
 @property (nonatomic, strong) UIImageView *imageView;
 
 @end
@@ -34,8 +35,6 @@
     _imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:_imageView];
     
-    
-    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"h264"];
         FILE *fp = fopen([filePath UTF8String], "rb");
@@ -46,8 +45,8 @@
         _filebuf = malloc(FILE_BUF_SIZE);
         
         //hw
-        _hwDecoder = [[TTHwH264Decoder alloc] init];
-        _hwDecoder.delegate = self;
+        _decoder = [[TTHwH264Decoder alloc] init];
+        [_decoder setDelegate:self];
         //sw
 //        _decoder = [[TTSwH264Decoder alloc] init];
 //        _decoder.delegate = self;
@@ -59,8 +58,7 @@
                 fclose(fp);
                 break;
             } else {
-//                [_decoder startDecoding:_filebuf length:nDataLen];
-                [_hwDecoder decode:_filebuf inputSize:nDataLen];
+                [_decoder decode:_filebuf length:nDataLen];
             }
         }
         
@@ -98,7 +96,7 @@
     CGImageRef cgImage = CGImageCreate(width,
                                        height,
                                        8,
-                                       4 * 8,
+                                       3 * 8,
                                        bytesPerRow,
                                        rgbColorSpace,
                                        kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrderDefault,

@@ -12,12 +12,24 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@protocol TTVideoEncodingDelegate <NSObject>
+@protocol TTVideoDecoding;
+
+
+@protocol TTVideoDecodingDelegate <NSObject>
+
 @required
-- (void)videoDecoder:(nullable id)decoder videoFrame:(nullable id)frame;
+- (void)videoDecoder:(nullable id<TTVideoDecoding>)decoder videoFrame:(nullable id)frame;
 
 @optional
-- (void)videoDecoder:(nullable id)decoder pixelBuffer:(nullable CVPixelBufferRef)pixelBuffer;
+- (void)videoDecoder:(nullable id<TTVideoDecoding>)decoder pixelBuffer:(nullable CVPixelBufferRef)pixelBuffer;
+
+@end
+
+#pragma mark - 抽象接口
+@protocol TTVideoDecoding <NSObject>
+
+- (void)setDelegate:(nullable id<TTVideoDecodingDelegate>)delegate;
+- (void)decode:(nullable void *)data_buffer length:(int)length;
 
 @end
 

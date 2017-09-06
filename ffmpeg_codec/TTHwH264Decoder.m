@@ -56,12 +56,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
 }
 
 - (void)dealloc {
-    
-//    if (_remainingBuffer) {
-//        free(_remainingBuffer);
-//        _remainingBuffer = NULL;
-//    }
-    
     if (_packetBuffer) {
         free(_packetBuffer);
         _packetBuffer = NULL;
@@ -90,6 +84,10 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
         decompressionSession = NULL;
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)setDelegate:(id<TTVideoDecodingDelegate>)delegate {
+    _delegate = delegate;
 }
 
 #pragma mark - notification
@@ -418,12 +416,13 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
     }
 }
 
-- (void)decode:(uint8_t *)inputBuffer inputSize:(NSInteger)inputSize {
+#pragma mark - Public Methods
+- (void)decode:(void *)data_buffer length:(int)length {
     if (_isBackGround) {
         return;
     }
-    _inputBuffer = inputBuffer;
-    _inputSize = inputSize;
+    _inputBuffer = data_buffer;
+    _inputSize = length;
     
     [self _splitH264StreamNALU];
 }

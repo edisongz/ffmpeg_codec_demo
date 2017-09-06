@@ -9,16 +9,16 @@
 #import <Foundation/Foundation.h>
 #import "TTVideoDecoding.h"
 
-@interface TTHwH264Decoder : NSObject
+@interface TTHwH264Decoder : NSObject <TTVideoDecoding>
 
-@property (nonatomic, weak) id<TTVideoEncodingDelegate> delegate;
+@property (nonatomic, weak) id<TTVideoDecodingDelegate> delegate;
 
 /**
  decode received buffer
 
- @param inputBuffer h.264 data buffer
- @param inputSize data buffer size
+ @param data_buffer h.264 data buffer
+ @param length data buffer size
  */
-- (void)decode:(uint8_t *)inputBuffer inputSize:(NSInteger)inputSize;
+- (void)decode:(void *)data_buffer length:(int)length;
 
 @end
