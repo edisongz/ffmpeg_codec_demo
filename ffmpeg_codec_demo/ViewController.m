@@ -14,9 +14,6 @@
 
 @interface ViewController () <TTVideoDecodingDelegate>
 {
-//    TTSwH264Decoder *_decoder;
-//    TTHwH264Decoder *_hwDecoder;
-    
     uint8_t *_filebuf;        //读入文件缓存
 }
 
@@ -74,15 +71,19 @@
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
     UIImage *image = [[self class] pixelBufferToImage:pixelBuffer];
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.imageView.image = image;
+        if (image) {
+            self.imageView.image = image;
+        }
     });
 }
 
+// only for test , in production env use yuv for OpenGL ES
 + (UIImage*)pixelBufferToImage:(CVPixelBufferRef) pixelBufffer{
     if (!pixelBufffer) {
         return nil;
     }
     
+//    kCVPixelFormatType_24RGB for test
     CVPixelBufferLockBaseAddress(pixelBufffer, 0);// 锁定pixel buffer的基地址
     void * baseAddress = CVPixelBufferGetBaseAddress(pixelBufffer);// 得到pixel buffer的基地址
     size_t width = CVPixelBufferGetWidth(pixelBufffer);
@@ -96,7 +97,7 @@
     CGImageRef cgImage = CGImageCreate(width,
                                        height,
                                        8,
-                                       3 * 8,
+                                       3 * 8,       //kCVPixelFormatType_24RGB
                                        bytesPerRow,
                                        rgbColorSpace,
                                        kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrderDefault,

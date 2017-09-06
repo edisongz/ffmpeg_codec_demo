@@ -32,7 +32,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
     NSInteger _packetSize;
     
     //上次remaining data
-//    uint8_t *_remainingBuffer;
     NSMutableData *_remainingData;
     NSInteger _remainingSize;
 }
@@ -103,9 +102,8 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
 
 /**
  处理接收到的流数据，不一定是完整的NALU
- 
+ 后续用slab内存来处理 经常有分配释放的情况
  */
-#warning - 后续用slab内存来处理 经常有分配释放的情况
 - (void)_splitH264StreamNALU {
     if (!_inputBuffer || _inputSize == 0) {
         return;
@@ -115,9 +113,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
     if (memcmp(_inputBuffer, g_StartCode, 4) == 0) {
         uint8_t *pstart = _inputBuffer + 4;
         uint8_t *const pend = _inputBuffer + _inputSize;
-        
-//        _inputBuffer += 4;
-//        _inputSize -= 4;
         
         while (pstart < pend) {
             if (memcmp(pstart - 3, g_StartCode, 4) == 0) {
@@ -133,16 +128,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
                 }
                 
                 memcpy(_packetBuffer, _inputBuffer, _packetSize);
-                //move inputbuffer
-                //                memmove(_videodata, pstart + 1, pend - (pstart + 1));
-                //                _videodatalength = pend - (pstart + 1);
-                //                _videodata += _packetSize + 4;
-                //                pstart = _videodata;
-                
-//                _inputBuffer += _packetSize + 4;
-//                pstart = _inputBuffer;
-//                _inputSize = pend - pstart;
-                
                 _inputBuffer += _packetSize;
                 _inputSize -= _packetSize;
                 
@@ -177,19 +162,7 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
                 //copy 存量数据
                 const uint8_t *remainingdata = [_remainingData bytes];
                 memcpy(_packetBuffer, remainingdata, _remainingSize);
-//                memcpy(_packetBuffer, _remainingBuffer, _remainingSize);
                 memcpy(_packetBuffer + _remainingSize, _inputBuffer, (_packetSize - _remainingSize));
-                //move inputbuffer
-                //                memmove(_videodata, pStart + 1, pEnd - (pStart + 1));
-                //                _videodatalength = pEnd - (pStart + 1);
-                //                _videodata += _packetSize + 4;
-                //                _videodatalength -= (_packetSize + 4);
-                
-                //                _videodata += 1;
-                //                pStart = _videodata;
-//                pStart++;
-//                _inputBuffer = pStart;
-//                _inputSize = pEnd - pStart;
                 
                 NSInteger newSize = (NSInteger)(_packetSize - _remainingSize);
                 if (newSize >= 0 && newSize < _inputSize) {
@@ -198,10 +171,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
                 }
                 
                 //读取存量数据完成，释放
-//                if (_remainingBuffer) {
-//                    free(_remainingBuffer);
-//                    _remainingBuffer = NULL;
-//                }
                 _remainingSize = 0;
                 
                 [_remainingData resetBytesInRange:NSMakeRange(0, _remainingData.length)];
@@ -217,11 +186,6 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
     // 暂存后面残留的数据，下次输入再拼接
     if (_inputSize >= 0) {
         _remainingSize += _inputSize;
-//        _remainingBuffer = realloc(_remainingBuffer, _remainingSize);
-//        if (!_remainingBuffer) { // memory alloc failed
-//            return;
-//        }
-//        memcpy(_remainingBuffer, _inputBuffer, _remainingSize);
         [_remainingData appendBytes:_inputBuffer length:_inputSize];
     }
 }
@@ -249,7 +213,13 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
         const void *keys[] = { kCVPixelBufferPixelFormatTypeKey };
         //      kCVPixelFormatType_420YpCbCr8Planar is YUV420
         //      kCVPixelFormatType_420YpCbCr8BiPlanarFullRange is NV12
-        uint32_t v = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
+        
+        /**
+         *  yuv420 for OpenGL ES，RGB for test image
+         **/
+//        uint32_t v = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
+        uint32_t v = kCVPixelFormatType_24RGB;          //only for test UIImage， not recommended
+        
         const void *values[] = { CFNumberCreate(NULL, kCFNumberSInt32Type, &v) };
         attrs = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
         
@@ -270,9 +240,9 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
 }
 
 /**
- decoding NALU buffer
+ decoding NALU frame
  */
-- (void)_decode {
+- (void)_decodeNALUFrame {
     
     CVPixelBufferRef outputPixelBuffer = NULL;
     if (decompressionSession) {
@@ -340,7 +310,7 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
         }
     }
     
-    if ([_delegate respondsToSelector:@selector(videoDecoder:pixelBuffer:)]) {
+    if (outputPixelBuffer && [_delegate respondsToSelector:@selector(videoDecoder:pixelBuffer:)]) {
         [_delegate videoDecoder:self pixelBuffer:outputPixelBuffer];
     }
 }
@@ -358,7 +328,7 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
     uint32_t *pNaluSize = (uint32_t *)_packetBuffer;
     *pNaluSize = CFSwapInt32HostToBig(naluSize);
     
-    int naluType = _packetBuffer[4] & 0x1F;
+    int naluType = _packetBuffer[4] & 0x1f;
     switch (naluType) {
         // Do not include the 4 byte size. Either in the sps/pps payloads, nor the size values.
         // https://stackoverflow.com/questions/25078364/cmvideoformatdescriptioncreatefromh264parametersets-issues
@@ -390,19 +360,19 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
         {
             // IDR / I frame
             [self _resetDecompressionSession];
-            [self _decode];
+            [self _decodeNALUFrame];
         }
             break;
         case 0x01:
         {
             // P frame
-            [self _decode];
+            [self _decodeNALUFrame];
         }
             break;
         default:
         {
             // B Frame or other
-            [self _decode];
+            [self _decodeNALUFrame];
         }
             break;
     }
