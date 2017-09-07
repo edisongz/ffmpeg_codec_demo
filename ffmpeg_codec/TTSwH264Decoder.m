@@ -18,26 +18,26 @@
 
 @interface TTSwH264Decoder () {
     AVPacket _avpkt;
-    AVFrame *_pRGBFrame;    //帧对象
-    AVFrame *_pYUVFrame;    //帧对象
+    AVFrame *_pRGBFrame;        //帧对象
+    AVFrame *_pYUVFrame;        //帧对象
     
     AVCodecParserContext *_avParserContext;
-    AVCodec *_pCodecH264;    //解码器
-    AVCodecContext *_ctx;        //解码器数据结构对象
-    uint8_t *_yuv_buf;      //yuv图像数据区
-    uint8_t *_rgb_buf;        //rgb图像数据区
-    struct SwsContext *_scxt;        //图像格式转换对象
+    AVCodec *_pCodecH264;       //解码器
+    AVCodecContext *_ctx;       //解码器数据结构对象
+    uint8_t *_yuv_buf;          //yuv图像数据区
+    uint8_t *_rgb_buf;          //rgb图像数据区
+    struct SwsContext *_scxt;   //图像格式转换对象
     
     uint8_t *_streambuf;        //h264 stream buffer
-//    uint8_t *_outbuf;        //解码出来视频数据缓存
-    int _nDataLen;            //h264 stream 数据区长度
+//    uint8_t *_outbuf;         //解码出来视频数据缓存
+    int _nDataLen;              //h264 stream 数据区长度
     
-    uint8_t *_pbuf;            //用以存放帧数据
-    int _nOutSize;            //用以记录帧数据长度
-    int _haveread;            //用以记录已读buf长度
-    int _decodelen;            //解码器返回长度
+    uint8_t *_pbuf;             //用以存放帧数据
+    int _nOutSize;              //用以记录帧数据长度
+    int _haveread;              //用以记录已读buf长度
+    int _decodelen;             //解码器返回长度
     int _piclen;                //解码器返回图片长度
-    int _piccount;            //输出图片计数
+    int _piccount;              //输出图片计数
 }
 
 @end
@@ -55,10 +55,6 @@
 }
 
 - (void)dealloc {
-//    if (_streambuf) {
-//        free(_streambuf);
-//        _streambuf = NULL;
-//    }
     
     if (_pbuf) {
         free(_pbuf);
@@ -77,6 +73,7 @@
     
     av_free(_pRGBFrame);
     av_free(_pYUVFrame);    //释放帧资源
+    
     avcodec_close(_ctx);    //关闭解码器
     av_free(_ctx);
 }
@@ -91,7 +88,6 @@
     _pRGBFrame = av_frame_alloc();      //RGB帧数据赋值
     _pYUVFrame = av_frame_alloc();
     
-//    _streambuf = malloc(BUF_SIZE);        //初始化文件缓存数据区
     _pbuf = malloc(BUF_SIZE);           //初始化帧数据区
     _yuv_buf = malloc(BUF_SIZE);        //初始化YUV图像数据区
     _rgb_buf = malloc(BUF_SIZE);        //初始化RGB图像帧数据区
@@ -171,13 +167,14 @@
                                    AV_PIX_FMT_YUV420P, //_ctx->pix_fmt,
                                    _ctx->width,
                                    _ctx->height,
-                                   AV_PIX_FMT_RGB24,
-                                   SWS_FAST_BILINEAR, NULL, NULL, NULL);
+                                   AV_PIX_FMT_NV12,
+                                   SWS_FAST_BILINEAR,
+                                   NULL, NULL, NULL);
             
             if (_scxt) {
-                avpicture_fill((AVPicture*)_pRGBFrame, _rgb_buf, AV_PIX_FMT_RGB24, _ctx->width, _ctx->height);
+                avpicture_fill((AVPicture*)_pRGBFrame, _rgb_buf, AV_PIX_FMT_NV12, _ctx->width, _ctx->height);
                 
-                if (avpicture_alloc((AVPicture*)_pRGBFrame, AV_PIX_FMT_RGB24, _ctx->width, _ctx->height) >= 0) {
+                if (avpicture_alloc((AVPicture*)_pRGBFrame, AV_PIX_FMT_NV12, _ctx->width, _ctx->height) >= 0) {
                     sws_scale(_scxt,
                               (const uint8_t* const*)_pYUVFrame->data,
                               _pYUVFrame->linesize,
@@ -201,6 +198,33 @@
     }
 }
 
+//+ (CVPixelBufferRef)NV12ToPixelBuffer:(AVFrame *)yuv_frame width:(size_t)width height:(size_t)height {
+//    
+//    NSDictionary *pixelAttributes = @{(id)kCVPixelBufferIOSurfacePropertiesKey : @{}};
+//    CVPixelBufferRef pixelBuffer = NULL;
+//    CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
+//                                          width,
+//                                          height,
+//                                          kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+//                                          (__bridge CFDictionaryRef)(pixelAttributes),
+//                                          &pixelBuffer);
+//    
+//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+//    uint8_t *yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+//    memcpy(yDestPlane, yPlane, size.width * size.height);
+//    uint8_t *uvDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+//    memcpy(uvDestPlane, uvPlane, numberOfElementsForChroma);
+//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//    
+//    if (result != kCVReturnSuccess) {
+//        NSLog(@"Unable to create cvpixelbuffer %d", result);
+//        return NULL;
+//    }
+////    CIImage *coreImage = [CIImage imageWithCVPixelBuffer:pixelBuffer]; //success!
+////    CVPixelBufferRelease(pixelBuffer);
+//    
+//    return pixelBuffer;
+//}
 
 /**
  avframe to UIImage

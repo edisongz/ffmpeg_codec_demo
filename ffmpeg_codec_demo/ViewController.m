@@ -42,11 +42,11 @@
         _filebuf = malloc(FILE_BUF_SIZE);
         
         //hw
-        _decoder = [[TTHwH264Decoder alloc] init];
-        [_decoder setDelegate:self];
+//        _decoder = [[TTHwH264Decoder alloc] init];
+//        [_decoder setDelegate:self];
         //sw
-//        _decoder = [[TTSwH264Decoder alloc] init];
-//        _decoder.delegate = self;
+        _decoder = [[TTSwH264Decoder alloc] init];
+        [_decoder setDelegate:self];
         
         int nDataLen = 0;
         while (true) {
@@ -77,6 +77,7 @@
     });
 }
 
+#pragma mark - test
 // only for test , in production env use yuv for OpenGL ES
 + (UIImage*)pixelBufferToImage:(CVPixelBufferRef) pixelBufffer{
     if (!pixelBufffer) {
@@ -116,6 +117,72 @@
     
     return image;
 }
+
+//- (CVPixelBufferRef)pixelBufferFromYuvData:(const uint8_t *)data size:(CGSize)size {
+//    NSDictionary *pixelAttributes = @{(id)kCVPixelBufferIOSurfacePropertiesKey : @{}};
+//    CVPixelBufferRef pixelBuffer = NULL;
+//    CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
+//                                          size.width,
+//                                          size.height,
+//                                          kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+//                                          (__bridge CFDictionaryRef)(pixelAttributes),
+//                                          &pixelBuffer);
+//    
+//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+//    uint8_t *yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+//    memcpy(yDestPlane, yPlane, size.width * size.height);
+//    uint8_t *uvDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+//    memcpy(uvDestPlane, uvPlane, numberOfElementsForChroma);
+//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//    
+//    if (result != kCVReturnSuccess) {
+//        DDLogWarn(@"Unable to create cvpixelbuffer %d", result);
+//    }
+//    
+//    CIImage *coreImage = [CIImage imageWithCVPixelBuffer:pixelBuffer]; //success!
+//    CVPixelBufferRelease(pixelBuffer);
+//    
+//    return pixelbuffer;
+//}
+
+//+ (CVPixelBufferRef) copyDataFromBuffer:(const unsigned char*)buffer toYUVPixelBufferWithWidth:(size_t)w Height:(size_t)h
+//{
+//
+//    NSDictionary *pixelBufferAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+//                             [NSNumber numberWithBool:YES], kCVPixelBufferCGImageCompatibilityKey,
+//                             [NSNumber numberWithBool:YES], kCVPixelBufferCGBitmapContextCompatibilityKey,
+//                             nil];
+//    
+//    CVPixelBufferRef pixelBuffer;
+//    CVPixelBufferCreate(NULL,
+//                        w,
+//                        h,
+//                        KVideoPixelFormatType,
+//                        (__bridge CFDictionaryRef)(pixelBufferAttributes),
+//                        &pixelBuffer);
+//    
+//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+//    
+//    size_t d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+//    const unsigned char* src = buffer;
+//    unsigned char* dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+//    
+//    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
+//        memcpy(dst, src, w);
+//    }
+//    
+//    d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+//    dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+//    h = h >> 1;
+//    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
+//        memcpy(dst, src, w);
+//    }
+//    
+//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//    
+//    return pixelBuffer;
+//    
+//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
