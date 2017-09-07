@@ -15,6 +15,7 @@
 @interface ViewController () <TTVideoDecodingDelegate>
 {
     uint8_t *_filebuf;        //读入文件缓存
+    dispatch_queue_t _serialQueue;
 }
 
 @property (nonatomic, strong) id<TTVideoDecoding> decoder;
@@ -31,6 +32,8 @@
     _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(20, 20, 240, 320)];
     _imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:_imageView];
+    
+    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"h264"];
@@ -69,120 +72,50 @@
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
-    UIImage *image = [[self class] pixelBufferToImage:pixelBuffer];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (image) {
-            self.imageView.image = image;
-        }
-    });
+    
 }
 
 #pragma mark - test
-// only for test , in production env use yuv for OpenGL ES
-+ (UIImage*)pixelBufferToImage:(CVPixelBufferRef) pixelBufffer{
-    if (!pixelBufffer) {
-        return nil;
-    }
-    
-//    kCVPixelFormatType_24RGB for test
-    CVPixelBufferLockBaseAddress(pixelBufffer, 0);// 锁定pixel buffer的基地址
-    void * baseAddress = CVPixelBufferGetBaseAddress(pixelBufffer);// 得到pixel buffer的基地址
-    size_t width = CVPixelBufferGetWidth(pixelBufffer);
-    size_t height = CVPixelBufferGetHeight(pixelBufffer);
-    size_t bufferSize = CVPixelBufferGetDataSize(pixelBufffer);
-    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBufffer);// 得到pixel buffer的行字节数
-    
-    CGColorSpaceRef rgbColorSpace = CGColorSpaceCreateDeviceRGB();// 创建一个依赖于设备的RGB颜色空间
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL);
-    
-    CGImageRef cgImage = CGImageCreate(width,
-                                       height,
-                                       8,
-                                       3 * 8,       //kCVPixelFormatType_24RGB
-                                       bytesPerRow,
-                                       rgbColorSpace,
-                                       kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrderDefault,
-                                       provider,
-                                       NULL,
-                                       true,
-                                       kCGRenderingIntentDefault);//这个是建立一个CGImageRef对象的函数
-    
-    UIImage *image = [UIImage imageWithCGImage:cgImage];
-    CGImageRelease(cgImage);  //类似这些CG...Ref 在使用完以后都是需要release的，不然内存会有问题
-    CGDataProviderRelease(provider);
-    CGColorSpaceRelease(rgbColorSpace);
-    NSData* imageData = UIImageJPEGRepresentation(image, 1.0);//1代表图片是否压缩
-    image = [UIImage imageWithData:imageData];
-    CVPixelBufferUnlockBaseAddress(pixelBufffer, 0);   // 解锁pixel buffer
-    
-    return image;
-}
-
-//- (CVPixelBufferRef)pixelBufferFromYuvData:(const uint8_t *)data size:(CGSize)size {
-//    NSDictionary *pixelAttributes = @{(id)kCVPixelBufferIOSurfacePropertiesKey : @{}};
-//    CVPixelBufferRef pixelBuffer = NULL;
-//    CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
-//                                          size.width,
-//                                          size.height,
-//                                          kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
-//                                          (__bridge CFDictionaryRef)(pixelAttributes),
-//                                          &pixelBuffer);
-//    
-//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-//    uint8_t *yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-//    memcpy(yDestPlane, yPlane, size.width * size.height);
-//    uint8_t *uvDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-//    memcpy(uvDestPlane, uvPlane, numberOfElementsForChroma);
-//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-//    
-//    if (result != kCVReturnSuccess) {
-//        DDLogWarn(@"Unable to create cvpixelbuffer %d", result);
+//// only for test , in production env use yuv for OpenGL ES
+//+ (UIImage*)pixelBufferToImage:(CVPixelBufferRef) pixelBufffer{
+//    if (!pixelBufffer) {
+//        return nil;
 //    }
 //    
-//    CIImage *coreImage = [CIImage imageWithCVPixelBuffer:pixelBuffer]; //success!
-//    CVPixelBufferRelease(pixelBuffer);
+////    kCVPixelFormatType_24RGB for test
+//    CVPixelBufferLockBaseAddress(pixelBufffer, 0);// 锁定pixel buffer的基地址
+//    void * baseAddress = CVPixelBufferGetBaseAddress(pixelBufffer);// 得到pixel buffer的基地址
+//    size_t width = CVPixelBufferGetWidth(pixelBufffer);
+//    size_t height = CVPixelBufferGetHeight(pixelBufffer);
+//    size_t bufferSize = CVPixelBufferGetDataSize(pixelBufffer);
+//    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBufffer);// 得到pixel buffer的行字节数
 //    
-//    return pixelbuffer;
+//    CGColorSpaceRef rgbColorSpace = CGColorSpaceCreateDeviceRGB();// 创建一个依赖于设备的RGB颜色空间
+//    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL);
+//    
+//    CGImageRef cgImage = CGImageCreate(width,
+//                                       height,
+//                                       8,
+//                                       3 * 8,       //kCVPixelFormatType_24RGB
+//                                       bytesPerRow,
+//                                       rgbColorSpace,
+//                                       kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrderDefault,
+//                                       provider,
+//                                       NULL,
+//                                       true,
+//                                       kCGRenderingIntentDefault);//这个是建立一个CGImageRef对象的函数
+//    
+//    UIImage *image = [UIImage imageWithCGImage:cgImage];
+//    CGImageRelease(cgImage);  //类似这些CG...Ref 在使用完以后都是需要release的，不然内存会有问题
+//    CGDataProviderRelease(provider);
+//    CGColorSpaceRelease(rgbColorSpace);
+//    NSData* imageData = UIImageJPEGRepresentation(image, 1.0);//1代表图片是否压缩
+//    image = [UIImage imageWithData:imageData];
+//    CVPixelBufferUnlockBaseAddress(pixelBufffer, 0);   // 解锁pixel buffer
+//    
+//    return image;
 //}
 
-//+ (CVPixelBufferRef) copyDataFromBuffer:(const unsigned char*)buffer toYUVPixelBufferWithWidth:(size_t)w Height:(size_t)h
-//{
-//
-//    NSDictionary *pixelBufferAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-//                             [NSNumber numberWithBool:YES], kCVPixelBufferCGImageCompatibilityKey,
-//                             [NSNumber numberWithBool:YES], kCVPixelBufferCGBitmapContextCompatibilityKey,
-//                             nil];
-//    
-//    CVPixelBufferRef pixelBuffer;
-//    CVPixelBufferCreate(NULL,
-//                        w,
-//                        h,
-//                        KVideoPixelFormatType,
-//                        (__bridge CFDictionaryRef)(pixelBufferAttributes),
-//                        &pixelBuffer);
-//    
-//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-//    
-//    size_t d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-//    const unsigned char* src = buffer;
-//    unsigned char* dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-//    
-//    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
-//        memcpy(dst, src, w);
-//    }
-//    
-//    d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-//    dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-//    h = h >> 1;
-//    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
-//        memcpy(dst, src, w);
-//    }
-//    
-//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-//    
-//    return pixelBuffer;
-//    
-//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

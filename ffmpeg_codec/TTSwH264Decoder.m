@@ -38,6 +38,8 @@
     int _decodelen;             //解码器返回长度
     int _piclen;                //解码器返回图片长度
     int _piccount;              //输出图片计数
+    
+    CVPixelBufferPoolRef _pixelBufferPool;
 }
 
 @end
@@ -69,6 +71,11 @@
     if (_rgb_buf) {
         free(_rgb_buf);
         _rgb_buf = NULL;
+    }
+    
+    if (_pixelBufferPool) {
+        CVPixelBufferPoolRelease(_pixelBufferPool);
+        _pixelBufferPool = NULL;
     }
     
     av_free(_pRGBFrame);
@@ -184,7 +191,10 @@
                               _pRGBFrame->linesize);
                     
                     //读取解码后的数据
-                    [self rgbFrame2Image:_pRGBFrame size:CGSizeMake(_ctx->width, _ctx->height)];
+                    CVPixelBufferRef pixelBuffer = [self NV12ToPixelBuffer:_pRGBFrame width:_ctx->width height:_ctx->height];
+                    if ([_delegate respondsToSelector:@selector(videoDecoder:pixelBuffer:)]) {
+                        [_delegate videoDecoder:self pixelBuffer:pixelBuffer];
+                    }
                 }
                 
                 sws_freeContext(_scxt);//释放格式转换器资源
@@ -198,73 +208,54 @@
     }
 }
 
-//+ (CVPixelBufferRef)NV12ToPixelBuffer:(AVFrame *)yuv_frame width:(size_t)width height:(size_t)height {
-//    
-//    NSDictionary *pixelAttributes = @{(id)kCVPixelBufferIOSurfacePropertiesKey : @{}};
-//    CVPixelBufferRef pixelBuffer = NULL;
-//    CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
-//                                          width,
-//                                          height,
-//                                          kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
-//                                          (__bridge CFDictionaryRef)(pixelAttributes),
-//                                          &pixelBuffer);
-//    
-//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-//    uint8_t *yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-//    memcpy(yDestPlane, yPlane, size.width * size.height);
-//    uint8_t *uvDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-//    memcpy(uvDestPlane, uvPlane, numberOfElementsForChroma);
-//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-//    
-//    if (result != kCVReturnSuccess) {
-//        NSLog(@"Unable to create cvpixelbuffer %d", result);
-//        return NULL;
-//    }
-////    CIImage *coreImage = [CIImage imageWithCVPixelBuffer:pixelBuffer]; //success!
-////    CVPixelBufferRelease(pixelBuffer);
-//    
-//    return pixelBuffer;
-//}
 
 /**
- avframe to UIImage
+ Yuv to CVPixelBuffer
 
- @param rgb_frame - frame data
- @param size - width and height
+ @param frame yuv帧数据
+ @return 上传给GPU显示
  */
-- (void)rgbFrame2Image:(AVFrame *)rgb_frame size:(CGSize)size {
-    CFDataRef cfData = CFDataCreate(kCFAllocatorDefault, rgb_frame->data[0], rgb_frame->linesize[0] * size.height);
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData(cfData);
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    CGImageRef imageRef = CGImageCreate(size.width,
-                                        size.height,
-                                        8,
-                                        3 * 8,      //fmt rgb24
-                                        rgb_frame->linesize[0],
-                                        colorSpace,
-                                        kCGBitmapByteOrderDefault,
-                                        provider,
-                                        NULL,
-                                        NO,
-                                        kCGRenderingIntentDefault);
-    
-    UIImage *image = [UIImage imageWithCGImage:imageRef];
-    
-    __weak typeof(self) wself = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        __strong typeof(wself) sself = wself;
-        if (!sself) {
-            return ;
+- (CVPixelBufferRef)NV12ToPixelBuffer:(AVFrame *)frame width:(int)width height:(int)height {
+    if (!frame || !frame->data[0]) {
+        return NULL;
+    }
+    CVReturn cvError;
+    if (!_pixelBufferPool) {
+        NSMutableDictionary* attributes = [NSMutableDictionary dictionary];
+        [attributes setObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(NSString*)kCVPixelBufferPixelFormatTypeKey];
+        [attributes setObject:[NSNumber numberWithInt:width] forKey: (NSString*)kCVPixelBufferWidthKey];
+        [attributes setObject:[NSNumber numberWithInt:height] forKey: (NSString*)kCVPixelBufferHeightKey];
+//        [attributes setObject:@(1) forKey:(NSString*)kCVPixelBufferBytesPerRowAlignmentKey];
+        [attributes setObject:[NSDictionary dictionary] forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
+        cvError = CVPixelBufferPoolCreate(kCFAllocatorDefault, NULL, (__bridge CFDictionaryRef) attributes, &_pixelBufferPool);
+        
+        if (cvError != kCVReturnSuccess){
+            NSLog(@"CVPixelBufferPoolCreate Failed %d", cvError);
+            return NULL;
         }
-
-        [sself.delegate videoDecoder:sself videoFrame:image];
-    });
+    }
     
-    CGColorSpaceRelease(colorSpace);
-    CGImageRelease(imageRef);
-    CGDataProviderRelease(provider);
-    CFRelease(cfData);
+    CVPixelBufferRef pixelBuffer = NULL;
+    cvError = CVPixelBufferPoolCreatePixelBuffer(NULL, _pixelBufferPool, &pixelBuffer);
+    if (cvError != kCVReturnSuccess) {
+        NSLog(@"CVPixelBufferPoolCreatePixelBuffer Failed");
+        return NULL;
+    }
+    
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    size_t bytePerRowY = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    size_t bytesPerRowUV = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    
+    //Y分量
+    uint8_t *yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+    memcpy(yDestPlane, frame->data[0], bytePerRowY * height);
+    
+    //UV 分量交叉
+    uint8_t *uvDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+    memcpy(uvDestPlane, frame->data[1], bytesPerRowUV * height / 2);
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    return pixelBuffer;
 }
 
 @end
