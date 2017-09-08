@@ -196,6 +196,12 @@
                     if ([_delegate respondsToSelector:@selector(videoDecoder:pixelBuffer:)]) {
                         [_delegate videoDecoder:self pixelBuffer:pixelBuffer];
                     }
+                    
+                    // 模拟器内存不释放，真机没问题，wired
+                    if (pixelBuffer) {
+                        CVPixelBufferRelease(pixelBuffer);
+                        pixelBuffer = NULL;
+                    }
                 }
                 
                 sws_freeContext(_scxt);//释放格式转换器资源

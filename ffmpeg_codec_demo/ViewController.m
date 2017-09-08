@@ -67,13 +67,10 @@
     });
 }
 
-- (void)videoDecoder:(id)decoder videoFrame:(id)frame {
-    self.imageView.image = frame;
-}
-
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
     CIImage *ciimage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
     UIImage *image = [UIImage imageWithCIImage:ciimage];
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         self.imageView.image = image;
     });
