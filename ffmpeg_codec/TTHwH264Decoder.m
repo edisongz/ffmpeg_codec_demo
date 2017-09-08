@@ -216,9 +216,11 @@ static const uint8_t g_StartCode[4] = {0x00, 0x00, 0x00, 0x01};
         
         /**
          *  yuv420 for OpenGL ES，RGB for test image
+         *  此处需要注意 编码到解码，颜色空间的设置都必须保持一致，如果采集用了Full Range而播放端用Video Range，那么就会看到曝光过度的效果了，
+         *  光照好的地方都是白色
+         *  https://zhuanlan.zhihu.com/p/20551666
          **/
-//        uint32_t v = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
-        uint32_t v = kCVPixelFormatType_24RGB;          //only for test UIImage， not recommended
+        uint32_t v = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
         
         const void *values[] = { CFNumberCreate(NULL, kCFNumberSInt32Type, &v) };
         attrs = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);

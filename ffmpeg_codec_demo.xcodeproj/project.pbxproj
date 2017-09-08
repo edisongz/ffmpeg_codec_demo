@@ -947,6 +947,7 @@
 				EEE05F8B1F5FD00F00D9E2E3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		EEE05F8C1F5FD00F00D9E2E3 /* Build configuration list for PBXNativeTarget "ffmpeg_codec_demoTests" */ = {
 			isa = XCConfigurationList;
@@ -955,6 +956,7 @@
 				EEE05F8E1F5FD00F00D9E2E3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -192,6 +192,7 @@
                     
                     //读取解码后的数据
                     CVPixelBufferRef pixelBuffer = [self NV12ToPixelBuffer:_pRGBFrame width:_ctx->width height:_ctx->height];
+                    
                     if ([_delegate respondsToSelector:@selector(videoDecoder:pixelBuffer:)]) {
                         [_delegate videoDecoder:self pixelBuffer:pixelBuffer];
                     }
@@ -243,16 +244,16 @@
     }
     
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    size_t bytePerRowY = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-    size_t bytesPerRowUV = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+//    size_t bytePerRowY = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+//    size_t bytesPerRowUV = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
     
     //Y分量
     uint8_t *yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-    memcpy(yDestPlane, frame->data[0], bytePerRowY * height);
+    memcpy(yDestPlane, frame->data[0], width * height);
     
     //UV 分量交叉
     uint8_t *uvDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-    memcpy(uvDestPlane, frame->data[1], bytesPerRowUV * height / 2);
+    memcpy(uvDestPlane, frame->data[1], width * height / 2);
     
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
     return pixelBuffer;

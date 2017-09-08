@@ -72,50 +72,12 @@
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
-    
+    CIImage *ciimage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
+    UIImage *image = [UIImage imageWithCIImage:ciimage];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.imageView.image = image;
+    });
 }
-
-#pragma mark - test
-//// only for test , in production env use yuv for OpenGL ES
-//+ (UIImage*)pixelBufferToImage:(CVPixelBufferRef) pixelBufffer{
-//    if (!pixelBufffer) {
-//        return nil;
-//    }
-//    
-////    kCVPixelFormatType_24RGB for test
-//    CVPixelBufferLockBaseAddress(pixelBufffer, 0);// 锁定pixel buffer的基地址
-//    void * baseAddress = CVPixelBufferGetBaseAddress(pixelBufffer);// 得到pixel buffer的基地址
-//    size_t width = CVPixelBufferGetWidth(pixelBufffer);
-//    size_t height = CVPixelBufferGetHeight(pixelBufffer);
-//    size_t bufferSize = CVPixelBufferGetDataSize(pixelBufffer);
-//    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBufffer);// 得到pixel buffer的行字节数
-//    
-//    CGColorSpaceRef rgbColorSpace = CGColorSpaceCreateDeviceRGB();// 创建一个依赖于设备的RGB颜色空间
-//    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL);
-//    
-//    CGImageRef cgImage = CGImageCreate(width,
-//                                       height,
-//                                       8,
-//                                       3 * 8,       //kCVPixelFormatType_24RGB
-//                                       bytesPerRow,
-//                                       rgbColorSpace,
-//                                       kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrderDefault,
-//                                       provider,
-//                                       NULL,
-//                                       true,
-//                                       kCGRenderingIntentDefault);//这个是建立一个CGImageRef对象的函数
-//    
-//    UIImage *image = [UIImage imageWithCGImage:cgImage];
-//    CGImageRelease(cgImage);  //类似这些CG...Ref 在使用完以后都是需要release的，不然内存会有问题
-//    CGDataProviderRelease(provider);
-//    CGColorSpaceRelease(rgbColorSpace);
-//    NSData* imageData = UIImageJPEGRepresentation(image, 1.0);//1代表图片是否压缩
-//    image = [UIImage imageWithData:imageData];
-//    CVPixelBufferUnlockBaseAddress(pixelBufffer, 0);   // 解锁pixel buffer
-//    
-//    return image;
-//}
-
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

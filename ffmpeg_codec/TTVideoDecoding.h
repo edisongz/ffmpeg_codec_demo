@@ -14,11 +14,7 @@
 
 @protocol TTVideoDecoding;
 
-
 @protocol TTVideoDecodingDelegate <NSObject>
-
-@required
-- (void)videoDecoder:(nullable id<TTVideoDecoding>)decoder videoFrame:(nullable id)frame;
 
 @optional
 - (void)videoDecoder:(nullable id<TTVideoDecoding>)decoder pixelBuffer:(nullable CVPixelBufferRef)pixelBuffer;
