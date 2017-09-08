@@ -68,9 +68,9 @@
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
+#warning - 实际使用时，交给GPUImage ，此处仅为测试
     CIImage *ciimage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
     UIImage *image = [UIImage imageWithCIImage:ciimage];
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         self.imageView.image = image;
     });
