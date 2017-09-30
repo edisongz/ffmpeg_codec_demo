@@ -135,7 +135,9 @@
 
 - (void)resetResolution:(CGSize)size {
     _resolution = size;
-    //    x264_encoder_reconfig(_x264Encoder, _x264Param);
+    _x264Param->i_width     = _resolution.width;
+    _x264Param->i_height    = _resolution.height;
+    x264_encoder_reconfig(_x264Encoder, _x264Param);
 }
 
 #pragma mark - encode

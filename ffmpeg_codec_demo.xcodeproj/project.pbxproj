@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		EE396C3E1F62950B00603B71 /* TTx264VideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = EE396C3D1F62950B00603B71 /* TTx264VideoEncoder.m */; };
 		EE396C411F62953B00603B71 /* TTHwH264Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = EE396C401F62953B00603B71 /* TTHwH264Encoder.m */; };
+		EEA426BF1F7F8940007B7021 /* FFmpegVideoSplitDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA426BE1F7F8940007B7021 /* FFmpegVideoSplitDemo.m */; };
 		EEE05F6C1F5FD00F00D9E2E3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE05F6B1F5FD00F00D9E2E3 /* main.m */; };
 		EEE05F6F1F5FD00F00D9E2E3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE05F6E1F5FD00F00D9E2E3 /* AppDelegate.m */; };
 		EEE05F721F5FD00F00D9E2E3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE05F711F5FD00F00D9E2E3 /* ViewController.m */; };
@@ -56,6 +57,8 @@
 		EE396C3D1F62950B00603B71 /* TTx264VideoEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTx264VideoEncoder.m; sourceTree = "<group>"; };
 		EE396C3F1F62953B00603B71 /* TTHwH264Encoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTHwH264Encoder.h; sourceTree = "<group>"; };
 		EE396C401F62953B00603B71 /* TTHwH264Encoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTHwH264Encoder.m; sourceTree = "<group>"; };
+		EEA426BD1F7F8940007B7021 /* FFmpegVideoSplitDemo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegVideoSplitDemo.h; sourceTree = "<group>"; };
+		EEA426BE1F7F8940007B7021 /* FFmpegVideoSplitDemo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FFmpegVideoSplitDemo.m; sourceTree = "<group>"; };
 		EEE05F671F5FD00F00D9E2E3 /* ffmpeg_codec_demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ffmpeg_codec_demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEE05F6B1F5FD00F00D9E2E3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		EEE05F6D1F5FD00F00D9E2E3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -263,9 +266,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		EEA426BC1F7F88B0007B7021 /* ffmpeg_merge_split */ = {
+			isa = PBXGroup;
+			children = (
+				EEA426BD1F7F8940007B7021 /* FFmpegVideoSplitDemo.h */,
+				EEA426BE1F7F8940007B7021 /* FFmpegVideoSplitDemo.m */,
+			);
+			path = ffmpeg_merge_split;
+			sourceTree = "<group>";
+		};
 		EEE05F5E1F5FD00F00D9E2E3 = {
 			isa = PBXGroup;
 			children = (
+				EEA426BC1F7F88B0007B7021 /* ffmpeg_merge_split */,
 				EEE060441F5FD14C00D9E2E3 /* ffmpeg_codec */,
 				EEE05F901F5FD06600D9E2E3 /* third_party */,
 				EEE05F691F5FD00F00D9E2E3 /* ffmpeg_codec_demo */,
@@ -738,6 +751,7 @@
 				EEE05F6F1F5FD00F00D9E2E3 /* AppDelegate.m in Sources */,
 				EEE05F6C1F5FD00F00D9E2E3 /* main.m in Sources */,
 				EE396C3E1F62950B00603B71 /* TTx264VideoEncoder.m in Sources */,
+				EEA426BF1F7F8940007B7021 /* FFmpegVideoSplitDemo.m in Sources */,
 				EEE060551F5FDE3600D9E2E3 /* TTHwH264Decoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
