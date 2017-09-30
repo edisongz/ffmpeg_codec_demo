@@ -125,6 +125,8 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
         av_packet_unref(&readPacket);
     }
     
+//    http://blog.csdn.net/qingfengtsing/article/details/55295253
+    
 end:
     avformat_close_input(&ifmt_ctx);
     if (ofmt_ctx && !(ofmt->flags & AVFMT_NOFILE)) {
