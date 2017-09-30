@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "TTSwH264Decoder.h"
 #import "TTHwH264Decoder.h"
+#import "FFmpegVideoSpliter.h"
 
 #define FILE_BUF_SIZE       4096
 
@@ -20,6 +21,8 @@
 
 @property (nonatomic, strong) id<TTVideoDecoding> decoder;
 @property (nonatomic, strong) UIImageView *imageView;
+
+@property (nonatomic, strong) FFmpegVideoSpliter *videoSplitter;
 
 @end
 
@@ -33,38 +36,50 @@
     _imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:_imageView];
     
-    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"h264"];
-        FILE *fp = fopen([filePath UTF8String], "rb");
-        if (!fp) {
-            fprintf(stderr, "Could not open file\n");
-            return;
-        }
-        _filebuf = malloc(FILE_BUF_SIZE);
-        
-        //hw
-//        _decoder = [[TTHwH264Decoder alloc] init];
+    // h.264解码测试
+//    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
+//
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"h264"];
+//        FILE *fp = fopen([filePath UTF8String], "rb");
+//        if (!fp) {
+//            fprintf(stderr, "Could not open file\n");
+//            return;
+//        }
+//        _filebuf = malloc(FILE_BUF_SIZE);
+//
+//        //hw
+////        _decoder = [[TTHwH264Decoder alloc] init];
+////        [_decoder setDelegate:self];
+//        //sw
+//        _decoder = [[TTSwH264Decoder alloc] init];
 //        [_decoder setDelegate:self];
-        //sw
-        _decoder = [[TTSwH264Decoder alloc] init];
-        [_decoder setDelegate:self];
-        
-        int nDataLen = 0;
-        while (true) {
-            nDataLen = (int)fread(_filebuf, 1, FILE_BUF_SIZE, fp);
-            if (nDataLen <= 0) {
-                fclose(fp);
-                break;
-            } else {
-                [_decoder decode:_filebuf length:nDataLen];
-            }
-        }
-        
-        free(_filebuf);
-        fclose(fp);
-    });
+//
+//        int nDataLen = 0;
+//        while (true) {
+//            nDataLen = (int)fread(_filebuf, 1, FILE_BUF_SIZE, fp);
+//            if (nDataLen <= 0) {
+//                fclose(fp);
+//                break;
+//            } else {
+//                [_decoder decode:_filebuf length:nDataLen];
+//            }
+//        }
+//
+//        free(_filebuf);
+//        fclose(fp);
+//    });
+    
+    //videoSplitter 测试
+    _videoSplitter = [[FFmpegVideoSpliter alloc] init];
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"war3end" ofType:@"mp4"];
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docDir = [paths objectAtIndex:0];
+    NSString *outfilePath = [docDir stringByAppendingFormat:@"/out_file.mp4"];
+    NSLog(@"outpath = %@", outfilePath);
+    [_videoSplitter splitVideoWithInFilename:path outpath:outfilePath splitSec:10];
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
