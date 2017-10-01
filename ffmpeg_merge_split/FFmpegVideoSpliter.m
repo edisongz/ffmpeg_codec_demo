@@ -105,7 +105,7 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
     uint64_t keyFrame_index = 0;
     int frameCount = 0;
     //读取分割点附近的关键帧位置
-    while (1) {
+    while (true) {
         ++frame_index;
         ret = av_read_frame(ifmt_ctx, &readPacket);
         if (ret < 0) {
@@ -114,10 +114,10 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
         //过滤，只处理视频流
         if (readPacket.stream_index == video_index){
             ++frameCount;
-            if (readPacket.flags&AV_PKT_FLAG_KEY) {
+            if (readPacket.flags & AV_PKT_FLAG_KEY) {
                 keyFrame_index = frame_index;
             }
-            if (frameCount>splitVideoSize) {
+            if (frameCount > splitVideoSize) {
                 [keyframePosArray addObject:@(keyFrame_index)];
                 frameCount = 0;
             }
@@ -145,14 +145,16 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
     }
     
     keyFrame_index = [keyframePosArray.firstObject integerValue];
+    NSUInteger keyframeEnumerator = 1;
+    NSUInteger keyframeCount = keyframePosArray.count;
+    
     frame_index = 0;
     int64_t lastPts = 0;
     int64_t lastDts = 0;
     int64_t prePts = 0;
     int64_t preDts = 0;
-    for (NSNumber *frameValue in keyframePosArray) {
+    while (true) {
         ++frame_index;
-//        uint64_t frameVal64 = [frameValue integerValue];
         ret = av_read_frame(ifmt_ctx, &readPacket);
         if (ret < 0) {
             break;
@@ -179,9 +181,11 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
         if (frame_index == keyFrame_index) {
             lastPts = prePts;
             lastDts = preDts;
-            if ([frameValue isEqual:keyframePosArray.lastObject]) {
-                keyFrame_index = [frameValue integerValue];
+            if (keyframeEnumerator != keyframeCount - 1) {
+                keyFrame_index = [keyframePosArray[keyframeEnumerator] integerValue];
+                keyframeEnumerator++;
             }
+            
             av_write_trailer(ofmt_ctx);
             avio_close(ofmt_ctx->pb);
             avformat_free_context(ofmt_ctx);
