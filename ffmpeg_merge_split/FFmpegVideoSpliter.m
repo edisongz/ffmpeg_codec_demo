@@ -25,7 +25,7 @@ static int set_output_header(AVFormatContext *ifmt_ctx, AVFormatContext *ofmt_ct
         AVStream *in_stream = ifmt_ctx->streams[i];
         AVStream *out_stream = avformat_new_stream(ofmt_ctx, in_stream->codec->codec);
         if (!out_stream) {
-            return ret;
+            return -1;
         }
         
         ret = avcodec_copy_context(out_stream->codec, in_stream->codec);
@@ -34,7 +34,8 @@ static int set_output_header(AVFormatContext *ifmt_ctx, AVFormatContext *ofmt_ct
         }
         out_stream->codecpar->codec_tag = 0;
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER) {
-            out_stream->codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
+            //new api
+            ofmt_ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
         }
     }
     
@@ -70,7 +71,6 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
         avformat_close_input(&ifmt_ctx);
         return ret;
     }
-    
     //获取视频index
     for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
         AVStream *in_stream = ifmt_ctx->streams[i];
@@ -78,6 +78,8 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
             video_index = i;
         }
     }
+    
+    //计算fps
     int den = ifmt_ctx->streams[video_index]->r_frame_rate.den;
     int num = ifmt_ctx->streams[video_index]->r_frame_rate.num;
     float fps = num / (float)den;
@@ -89,15 +91,15 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
     NSString *suffix = [components lastObject];
     NSString *filename = components.firstObject;
     
-    NSString *outpath0 = [NSString stringWithFormat:@"%@0.%@", filename, suffix];
-    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, [outpath0 cStringUsingEncoding:NSASCIIStringEncoding]);
+    const char *outpath0 = [[NSString stringWithFormat:@"%@0.%@", filename, suffix] cStringUsingEncoding:NSASCIIStringEncoding];
+    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, outpath0);
     if (!ofmt_ctx) {
         fprintf(stderr, "Could not create output context\n");
         ret = AVERROR_UNKNOWN;
         return ret;
     }
     ofmt = ofmt_ctx->oformat;
-    set_output_header(ifmt_ctx, ofmt_ctx, in_filename, out_filename);
+    set_output_header(ifmt_ctx, ofmt_ctx, in_filename, outpath0);
     
     // 关键帧时间数组
     NSMutableArray *keyframePosArray = [[NSMutableArray alloc] init];
@@ -128,10 +130,12 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
     ifmt_ctx = NULL;
     
     if ((ret = avformat_open_input(&ifmt_ctx, in_filename, NULL, NULL)) < 0) {
-        return ret;
+        fprintf(stderr, "Could not open input file '%s'", in_filename);
+        goto end;
     }
     if ((ret = avformat_find_stream_info(ifmt_ctx, NULL)) < 0) {
-        return ret;
+        fprintf(stderr, "Failed to retrieve input stream information");
+        goto end;
     }
     
     int number = 0;
@@ -174,46 +178,50 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
             av_copy_packet(&splitKeyPacket, &readPacket);
         } else {
             if ((ret = av_interleaved_write_frame(ofmt_ctx, &readPacket)) < 0) {
-                return ret;
+                goto end;
             }
         }
         
         if (frame_index == keyFrame_index) {
             lastPts = prePts;
             lastDts = preDts;
-            if (keyframeEnumerator != keyframeCount - 1) {
-                keyFrame_index = [keyframePosArray[keyframeEnumerator] integerValue];
-                keyframeEnumerator++;
+            if (keyframeEnumerator < keyframeCount) {
+                keyFrame_index = [keyframePosArray[keyframeEnumerator++] integerValue];
             }
             
+            // split分片收尾
             av_write_trailer(ofmt_ctx);
             avio_close(ofmt_ctx->pb);
             avformat_free_context(ofmt_ctx);
+            
+            // 重新初始化split分片文件ctx
             ++number;
-            NSString *temp_name = [NSString stringWithFormat:@"%@%d.%@", filename, number, suffix];
+            const char *temp_name = [[NSString stringWithFormat:@"%@%d.%@", filename, number, suffix] cStringUsingEncoding:NSASCIIStringEncoding];
             avformat_alloc_output_context2(&ofmt_ctx,
                                            NULL,
                                            NULL,
-                                           [temp_name cStringUsingEncoding:NSASCIIStringEncoding]);
+                                           temp_name);
             if (!ofmt_ctx) {
-                return -1;
+                fprintf(stderr, "Could not create output context\n");
+                goto end;
             }
-            if ((ret = set_output_header(ifmt_ctx, ofmt_ctx, in_filename, [temp_name cStringUsingEncoding:NSASCIIStringEncoding])) < 0) {
-                return ret;
+            if ((ret = set_output_header(ifmt_ctx, ofmt_ctx,
+                                         in_filename, temp_name)) < 0) {
+                goto end;
             }
             splitKeyPacket.pts = 0;
             splitKeyPacket.dts = 0;
-            ret = av_interleaved_write_frame(ofmt_ctx, &splitKeyPacket);
-            if (ret < 0) {
-                return ret;
+            if ((ret = av_interleaved_write_frame(ofmt_ctx, &splitKeyPacket)) < 0) {
+                goto end;
             }
         }
-        
         av_packet_unref(&readPacket);
     }
     
     av_write_trailer(ofmt_ctx);
     av_packet_unref(&splitKeyPacket);
+    
+end:
     avformat_close_input(&ifmt_ctx);
     if (ofmt_ctx && !(ofmt->flags & AVFMT_NOFILE)) {
         avio_closep(&ofmt_ctx->pb);
