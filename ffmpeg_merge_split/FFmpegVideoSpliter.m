@@ -203,6 +203,7 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
                                            temp_name);
             if (!ofmt_ctx) {
                 fprintf(stderr, "Could not create output context\n");
+                ret = AVERROR_UNKNOWN;
                 goto end;
             }
             if ((ret = set_output_header(ifmt_ctx, ofmt_ctx,
