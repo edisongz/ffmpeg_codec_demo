@@ -114,7 +114,7 @@
     _delegate = delegate;
 }
 
-#pragma mark - reset
+#pragma mark - reconfig
 - (void)resetBitrate:(uint32_t)bitrate {
     _bitrate = bitrate;
     _x264Param->rc.i_bitrate = _bitrate;
@@ -145,7 +145,6 @@
     CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    
     uint8_t *baseAddr0 = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
     uint8_t *baseAddr1 = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
     

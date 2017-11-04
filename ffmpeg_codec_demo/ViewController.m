@@ -11,6 +11,8 @@
 #import "TTHwH264Decoder.h"
 #import "FFmpegVideoSpliter.h"
 
+#import "TTSWH265Encodeer.h"
+
 #define FILE_BUF_SIZE       4096
 
 @interface ViewController () <TTVideoDecodingDelegate>
@@ -19,6 +21,7 @@
     dispatch_queue_t _serialQueue;
 }
 
+@property (nonatomic, strong) id<TTVideoEncoding> encoder;
 @property (nonatomic, strong) id<TTVideoDecoding> decoder;
 @property (nonatomic, strong) UIImageView *imageView;
 
@@ -37,7 +40,11 @@
     [self.view addSubview:_imageView];
     
     // h.264解码测试
-//    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
+    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        self.encoder = [[TTSWH265Encodeer alloc] init];
+    });
+    
 //
 //    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 //        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"h264"];
@@ -71,15 +78,15 @@
 //    });
     
     //videoSplitter 测试
-    _videoSplitter = [[FFmpegVideoSpliter alloc] init];
-    
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"war3end" ofType:@"mp4"];
-    
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *docDir = [paths objectAtIndex:0];
-    NSString *outfilePath = [docDir stringByAppendingFormat:@"/out_file.mp4"];
-    NSLog(@"outpath = %@", outfilePath);
-    [_videoSplitter splitVideoWithInFilename:path outpath:outfilePath splitSec:10];
+//    _videoSplitter = [[FFmpegVideoSpliter alloc] init];
+//
+//    NSString *path = [[NSBundle mainBundle] pathForResource:@"war3end" ofType:@"mp4"];
+//
+//    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//    NSString *docDir = [paths objectAtIndex:0];
+//    NSString *outfilePath = [docDir stringByAppendingFormat:@"/out_file.mp4"];
+//    NSLog(@"outpath = %@", outfilePath);
+//    [_videoSplitter splitVideoWithInFilename:path outpath:outfilePath splitSec:10];
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {
