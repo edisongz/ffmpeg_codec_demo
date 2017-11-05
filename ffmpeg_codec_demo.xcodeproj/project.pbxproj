@@ -9,8 +9,9 @@
 /* Begin PBXBuildFile section */
 		400371995C5443322047A6E9 /* libPods-ffmpeg_codec_demoTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D5A8A238E84F4662F28D4071 /* libPods-ffmpeg_codec_demoTests.a */; };
 		5FD3025194422854D905E5B3 /* libPods-ffmpeg_codec_demo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 27813EEB0884805B889ADF03 /* libPods-ffmpeg_codec_demo.a */; };
-		B70B82991FAE1004004F0433 /* TTSWH265Encodeer.m in Sources */ = {isa = PBXBuildFile; fileRef = B70B82981FAE1004004F0433 /* TTSWH265Encodeer.m */; };
+		B70B82991FAE1004004F0433 /* TTSWH265Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B70B82981FAE1004004F0433 /* TTSWH265Encoder.m */; };
 		B781C8231F80090800B011AD /* war3end.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B781C8221F7FFDC900B011AD /* war3end.mp4 */; };
+		B7AFD5331FAF322C000D74C8 /* TTHWH265Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B7AFD5321FAF322C000D74C8 /* TTHWH265Encoder.m */; };
 		EE396C3E1F62950B00603B71 /* TTx264VideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = EE396C3D1F62950B00603B71 /* TTx264VideoEncoder.m */; };
 		EE396C411F62953B00603B71 /* TTHwH264Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = EE396C401F62953B00603B71 /* TTHwH264Encoder.m */; };
 		EEA426BF1F7F8940007B7021 /* FFmpegVideoSpliter.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA426BE1F7F8940007B7021 /* FFmpegVideoSpliter.m */; };
@@ -61,9 +62,11 @@
 		5704413AFF966500FB5F92BF /* Pods-ffmpeg_codec_demoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ffmpeg_codec_demoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ffmpeg_codec_demoTests/Pods-ffmpeg_codec_demoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		712DBF4DCF0F898C81DEB322 /* Pods-ffmpeg_codec_demoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ffmpeg_codec_demoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ffmpeg_codec_demoTests/Pods-ffmpeg_codec_demoTests.release.xcconfig"; sourceTree = "<group>"; };
 		98A73992C9A77EA88ABDCD23 /* Pods-ffmpeg_codec_demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ffmpeg_codec_demo.release.xcconfig"; path = "Pods/Target Support Files/Pods-ffmpeg_codec_demo/Pods-ffmpeg_codec_demo.release.xcconfig"; sourceTree = "<group>"; };
-		B70B82971FAE1004004F0433 /* TTSWH265Encodeer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTSWH265Encodeer.h; sourceTree = "<group>"; };
-		B70B82981FAE1004004F0433 /* TTSWH265Encodeer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TTSWH265Encodeer.m; sourceTree = "<group>"; };
+		B70B82971FAE1004004F0433 /* TTSWH265Encoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTSWH265Encoder.h; sourceTree = "<group>"; };
+		B70B82981FAE1004004F0433 /* TTSWH265Encoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TTSWH265Encoder.m; sourceTree = "<group>"; };
 		B781C8221F7FFDC900B011AD /* war3end.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = war3end.mp4; sourceTree = "<group>"; };
+		B7AFD5311FAF322C000D74C8 /* TTHWH265Encoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTHWH265Encoder.h; sourceTree = "<group>"; };
+		B7AFD5321FAF322C000D74C8 /* TTHWH265Encoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TTHWH265Encoder.m; sourceTree = "<group>"; };
 		D5A8A238E84F4662F28D4071 /* libPods-ffmpeg_codec_demoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ffmpeg_codec_demoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE396C3B1F62943300603B71 /* TTVideoEncoding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTVideoEncoding.h; sourceTree = "<group>"; };
 		EE396C3C1F62950B00603B71 /* TTx264VideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTx264VideoEncoder.h; sourceTree = "<group>"; };
@@ -655,8 +658,10 @@
 				EE396C3F1F62953B00603B71 /* TTHwH264Encoder.h */,
 				EE396C401F62953B00603B71 /* TTHwH264Encoder.m */,
 				EE396C3B1F62943300603B71 /* TTVideoEncoding.h */,
-				B70B82971FAE1004004F0433 /* TTSWH265Encodeer.h */,
-				B70B82981FAE1004004F0433 /* TTSWH265Encodeer.m */,
+				B70B82971FAE1004004F0433 /* TTSWH265Encoder.h */,
+				B70B82981FAE1004004F0433 /* TTSWH265Encoder.m */,
+				B7AFD5311FAF322C000D74C8 /* TTHWH265Encoder.h */,
+				B7AFD5321FAF322C000D74C8 /* TTHWH265Encoder.m */,
 			);
 			path = ffmpeg_codec;
 			sourceTree = "<group>";
@@ -877,9 +882,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7AFD5331FAF322C000D74C8 /* TTHWH265Encoder.m in Sources */,
 				EE396C411F62953B00603B71 /* TTHwH264Encoder.m in Sources */,
 				EEE060471F5FD18100D9E2E3 /* TTSwH264Decoder.m in Sources */,
-				B70B82991FAE1004004F0433 /* TTSWH265Encodeer.m in Sources */,
+				B70B82991FAE1004004F0433 /* TTSWH265Encoder.m in Sources */,
 				EEE05F721F5FD00F00D9E2E3 /* ViewController.m in Sources */,
 				EEE05F6F1F5FD00F00D9E2E3 /* AppDelegate.m in Sources */,
 				EEE05F6C1F5FD00F00D9E2E3 /* main.m in Sources */,

@@ -1,15 +1,15 @@
 //
-//  TTSWH265Encodeer.h
+//  TTHWH265Encoder.h
 //  ffmpeg_codec_demo
 //
-//  Created by 蒋益杰 on 2017/11/4.
+//  Created by 蒋益杰 on 2017/11/5.
 //  Copyright © 2017年 t. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import "TTVideoEncoding.h"
 
-@interface TTSWH265Encodeer : NSObject <TTVideoEncoding>
+@interface TTHWH265Encoder : NSObject <TTVideoEncoding>
 
 @property (nonatomic, weak) id<TTVideoEncodingDelegate> delegate;
 

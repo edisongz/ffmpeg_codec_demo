@@ -11,7 +11,7 @@
 #import "TTHwH264Decoder.h"
 #import "FFmpegVideoSpliter.h"
 
-#import "TTSWH265Encodeer.h"
+#import "TTSWH265Encoder.h"
 
 #define FILE_BUF_SIZE       4096
 
@@ -42,7 +42,7 @@
     // h.264解码测试
     _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        self.encoder = [[TTSWH265Encodeer alloc] init];
+        self.encoder = [[TTSWH265Encoder alloc] init];
     });
     
 //

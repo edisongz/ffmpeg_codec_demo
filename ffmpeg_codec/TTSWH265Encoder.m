@@ -6,46 +6,46 @@
 //  Copyright © 2017年 t. All rights reserved.
 //
 
-#import "TTSWH265Encodeer.h"
+#import "TTSWH265Encoder.h"
 #import <libavcodec/avcodec.h>
 #import <libavformat/avformat.h>
 #import <libswscale/swscale.h>
 #import <libavutil/opt.h>
 #import <libavutil/imgutils.h>
 
-int flush_encoder(AVFormatContext *fmt_ctx,unsigned int stream_index)
-{
-    int ret;
-    int got_frame;
-    AVPacket enc_pkt;
-    if (!(fmt_ctx->streams[stream_index]->codec->codec->capabilities &
-          CODEC_CAP_DELAY))
-        return 0;
-    while (1) {
-        printf("Flushing stream #%u encoder\n", stream_index);
-        //ret = encode_write_frame(NULL, stream_index, &got_frame);
-        enc_pkt.data = NULL;
-        enc_pkt.size = 0;
-        av_init_packet(&enc_pkt);
-        ret = avcodec_encode_video2 (fmt_ctx->streams[stream_index]->codec, &enc_pkt,
-                                     NULL, &got_frame);
-        av_frame_free(NULL);
-        if (ret < 0)
-            break;
-        if (!got_frame){
-            ret=0;
-            break;
-        }
-        printf("Succeed to encode 1 frame! 编码成功1帧！\n");
-        /* mux encoded frame */
-        ret = av_write_frame(fmt_ctx, &enc_pkt);
-        if (ret < 0)
-            break;
-    }
-    return ret;
-}
+//static int flush_encoder(AVFormatContext *fmt_ctx,unsigned int stream_index)
+//{
+//    int ret;
+//    int got_frame;
+//    AVPacket enc_pkt;
+//    if (!(fmt_ctx->streams[stream_index]->codec->codec->capabilities &
+//          CODEC_CAP_DELAY))
+//        return 0;
+//    while (1) {
+//        printf("Flushing stream #%u encoder\n", stream_index);
+//        //ret = encode_write_frame(NULL, stream_index, &got_frame);
+//        enc_pkt.data = NULL;
+//        enc_pkt.size = 0;
+//        av_init_packet(&enc_pkt);
+//        ret = avcodec_encode_video2 (fmt_ctx->streams[stream_index]->codec, &enc_pkt,
+//                                     NULL, &got_frame);
+//        av_frame_free(NULL);
+//        if (ret < 0)
+//            break;
+//        if (!got_frame){
+//            ret=0;
+//            break;
+//        }
+//        printf("Succeed to encode 1 frame! 编码成功1帧！\n");
+//        /* mux encoded frame */
+//        ret = av_write_frame(fmt_ctx, &enc_pkt);
+//        if (ret < 0)
+//            break;
+//    }
+//    return ret;
+//}
 
-@interface TTSWH265Encodeer () {
+@interface TTSWH265Encoder () {
     AVStream *_video_st;
     AVCodecContext *_pCodecCtx;
     AVCodec *_pCodecH265;
@@ -62,7 +62,7 @@ int flush_encoder(AVFormatContext *fmt_ctx,unsigned int stream_index)
 
 @end
 
-@implementation TTSWH265Encodeer
+@implementation TTSWH265Encoder
 
 - (instancetype)init
 {
@@ -95,7 +95,7 @@ int flush_encoder(AVFormatContext *fmt_ctx,unsigned int stream_index)
     }
 //    _nDataLen = 0;
     
-    _pCodecCtx->codec_id =AV_CODEC_ID_HEVC;
+    _pCodecCtx->codec_id = AV_CODEC_ID_HEVC;
     _pCodecCtx->codec_type = AVMEDIA_TYPE_VIDEO;
     _pCodecCtx->pix_fmt = AV_PIX_FMT_YUV420P;
     _pCodecCtx->width = 480;
@@ -169,7 +169,7 @@ int flush_encoder(AVFormatContext *fmt_ctx,unsigned int stream_index)
     // yuv420
     // from: http://www.cnblogs.com/azraelly/archive/2013/01/01/2841269.htm
     // 此处可以用libyuv 中的arm neon优化，对yuv序列进行预处理，后续处理
-    for (int i = 0; i < 640 * 480 / 4; i++) {
+    for (int i = 0; i < f_size / 4; i++) {
         *pdst1++ = *baseAddr1++;
         *pdst2++ = *baseAddr1++;
     }
