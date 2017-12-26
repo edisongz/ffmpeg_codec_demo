@@ -10,6 +10,7 @@
 #import "TTSwH264Decoder.h"
 #import "TTHwH264Decoder.h"
 #import "FFmpegVideoSpliter.h"
+#import "FFmpegVideoMergeUtil.h"
 
 #import "TTSWH265Encoder.h"
 
@@ -26,6 +27,7 @@
 @property (nonatomic, strong) UIImageView *imageView;
 
 @property (nonatomic, strong) FFmpegVideoSpliter *videoSplitter;
+@property (nonatomic, strong) FFmpegVideoMergeUtil *videoMerger;
 
 @end
 
@@ -35,15 +37,15 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(20, 20, 240, 320)];
-    _imageView.contentMode = UIViewContentModeScaleAspectFit;
-    [self.view addSubview:_imageView];
-    
-    // h.264解码测试
-    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        self.encoder = [[TTSWH265Encoder alloc] init];
-    });
+//    _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(20, 20, 240, 320)];
+//    _imageView.contentMode = UIViewContentModeScaleAspectFit;
+//    [self.view addSubview:_imageView];
+//
+//    // h.264解码测试
+//    _serialQueue = dispatch_queue_create("com.video.decodequeue", NULL);
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        self.encoder = [[TTSWH265Encoder alloc] init];
+//    });
     
 //
 //    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -79,14 +81,29 @@
     
     //videoSplitter 测试
 //    _videoSplitter = [[FFmpegVideoSpliter alloc] init];
-//
-//    NSString *path = [[NSBundle mainBundle] pathForResource:@"war3end" ofType:@"mp4"];
-//
-//    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-//    NSString *docDir = [paths objectAtIndex:0];
-//    NSString *outfilePath = [docDir stringByAppendingFormat:@"/out_file.mp4"];
+
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"war3end" ofType:@"mp4"];
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docDir = [paths objectAtIndex:0];
+    NSString *outfilePath = [docDir stringByAppendingFormat:@"/out_file.mp4"];
 //    NSLog(@"outpath = %@", outfilePath);
 //    [_videoSplitter splitVideoWithInFilename:path outpath:outfilePath splitSec:10];
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        __strong typeof(weakSelf) sself = weakSelf;
+        if (!sself) {
+            return ;
+        }
+        
+        NSString *path1 = [[NSBundle mainBundle] pathForResource:@"sintel" ofType:@"mp4"];
+        NSString *outfilePath1 = [docDir stringByAppendingFormat:@"/merged_file.mp4"];
+        NSLog(@"%@", outfilePath1);
+        
+        sself.videoMerger = [[FFmpegVideoMergeUtil alloc] init];
+        [sself.videoMerger merge_video:path1 input_file2:path1 output_file:outfilePath1];
+    });
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {

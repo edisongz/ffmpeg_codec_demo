@@ -12,6 +12,8 @@
 		B70B82991FAE1004004F0433 /* TTSWH265Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B70B82981FAE1004004F0433 /* TTSWH265Encoder.m */; };
 		B781C8231F80090800B011AD /* war3end.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B781C8221F7FFDC900B011AD /* war3end.mp4 */; };
 		B7AFD5331FAF322C000D74C8 /* TTHWH265Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B7AFD5321FAF322C000D74C8 /* TTHWH265Encoder.m */; };
+		B7B14C0E1FF2814A008B46BA /* FFmpegVideoMergeUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B7B14C0D1FF2814A008B46BA /* FFmpegVideoMergeUtil.m */; };
+		B7B14C101FF28156008B46BA /* sintel.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B7B14C0F1FF28156008B46BA /* sintel.mp4 */; };
 		EE396C3E1F62950B00603B71 /* TTx264VideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = EE396C3D1F62950B00603B71 /* TTx264VideoEncoder.m */; };
 		EE396C411F62953B00603B71 /* TTHwH264Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = EE396C401F62953B00603B71 /* TTHwH264Encoder.m */; };
 		EEA426BF1F7F8940007B7021 /* FFmpegVideoSpliter.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA426BE1F7F8940007B7021 /* FFmpegVideoSpliter.m */; };
@@ -67,6 +69,9 @@
 		B781C8221F7FFDC900B011AD /* war3end.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = war3end.mp4; sourceTree = "<group>"; };
 		B7AFD5311FAF322C000D74C8 /* TTHWH265Encoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTHWH265Encoder.h; sourceTree = "<group>"; };
 		B7AFD5321FAF322C000D74C8 /* TTHWH265Encoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TTHWH265Encoder.m; sourceTree = "<group>"; };
+		B7B14C0C1FF2814A008B46BA /* FFmpegVideoMergeUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFmpegVideoMergeUtil.h; sourceTree = "<group>"; };
+		B7B14C0D1FF2814A008B46BA /* FFmpegVideoMergeUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFmpegVideoMergeUtil.m; sourceTree = "<group>"; };
+		B7B14C0F1FF28156008B46BA /* sintel.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sintel.mp4; sourceTree = "<group>"; };
 		D5A8A238E84F4662F28D4071 /* libPods-ffmpeg_codec_demoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ffmpeg_codec_demoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE396C3B1F62943300603B71 /* TTVideoEncoding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTVideoEncoding.h; sourceTree = "<group>"; };
 		EE396C3C1F62950B00603B71 /* TTx264VideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTx264VideoEncoder.h; sourceTree = "<group>"; };
@@ -284,11 +289,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B7B14C031FF132C7008B46BA /* videos */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = videos;
+			sourceTree = "<group>";
+		};
 		EEA426BC1F7F88B0007B7021 /* ffmpeg_merge_split */ = {
 			isa = PBXGroup;
 			children = (
 				EEA426BD1F7F8940007B7021 /* FFmpegVideoSpliter.h */,
 				EEA426BE1F7F8940007B7021 /* FFmpegVideoSpliter.m */,
+				B7B14C0C1FF2814A008B46BA /* FFmpegVideoMergeUtil.h */,
+				B7B14C0D1FF2814A008B46BA /* FFmpegVideoMergeUtil.m */,
 			);
 			path = ffmpeg_merge_split;
 			sourceTree = "<group>";
@@ -335,9 +349,11 @@
 		EEE05F6A1F5FD00F00D9E2E3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				B7B14C031FF132C7008B46BA /* videos */,
 				B781C8221F7FFDC900B011AD /* war3end.mp4 */,
 				EEE0604F1F5FD53F00D9E2E3 /* test.h264 */,
 				EEE060511F5FD54500D9E2E3 /* abc.h264 */,
+				B7B14C0F1FF28156008B46BA /* sintel.mp4 */,
 				EEE05F6B1F5FD00F00D9E2E3 /* main.m */,
 			);
 			name = "Supporting Files";
@@ -766,6 +782,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7B14C101FF28156008B46BA /* sintel.mp4 in Resources */,
 				B781C8231F80090800B011AD /* war3end.mp4 in Resources */,
 				EEE05F7A1F5FD00F00D9E2E3 /* LaunchScreen.storyboard in Resources */,
 				EEE05F771F5FD00F00D9E2E3 /* Assets.xcassets in Resources */,
@@ -882,6 +899,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7B14C0E1FF2814A008B46BA /* FFmpegVideoMergeUtil.m in Sources */,
 				B7AFD5331FAF322C000D74C8 /* TTHWH265Encoder.m in Sources */,
 				EE396C411F62953B00603B71 /* TTHwH264Encoder.m in Sources */,
 				EEE060471F5FD18100D9E2E3 /* TTSwH264Decoder.m in Sources */,

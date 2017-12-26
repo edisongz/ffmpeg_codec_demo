@@ -52,9 +52,9 @@ static int set_output_header(AVFormatContext *ifmt_ctx, AVFormatContext *ofmt_ct
     return 0;
 }
 
-static int splitVideo(const char *in_filename, const char *out_filename, uint32_t splitSeconds) {
+static void splitVideo(const char *in_filename, const char *out_filename, uint32_t splitSeconds) {
     if (in_filename == NULL || out_filename == NULL) {
-        return -1;
+        return;
     }
     
     AVPacket readPacket, splitKeyPacket;
@@ -64,12 +64,12 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
     
     if ((ret = avformat_open_input(&ifmt_ctx, in_filename, 0, 0)) < 0) {
         fprintf(stderr, "Could not open input file '%s'", in_filename);
-        return ret;
+        return;
     }
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0) {
         fprintf(stderr, "Failed to retrieve input stream information");
         avformat_close_input(&ifmt_ctx);
-        return ret;
+        return;
     }
     //获取视频index
     for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
@@ -95,8 +95,7 @@ static int splitVideo(const char *in_filename, const char *out_filename, uint32_
     avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, outpath0);
     if (!ofmt_ctx) {
         fprintf(stderr, "Could not create output context\n");
-        ret = AVERROR_UNKNOWN;
-        return ret;
+        return;
     }
     ofmt = ofmt_ctx->oformat;
     set_output_header(ifmt_ctx, ofmt_ctx, in_filename, outpath0);
@@ -230,9 +229,7 @@ end:
     avformat_free_context(ofmt_ctx);
     if (ret < 0 && ret != AVERROR_EOF) {
         fprintf(stderr, "Error occurred: %s\n", av_err2str(ret));
-        return 1;
     }
-    return 0;
 }
 
 @interface FFmpegVideoSpliter ()
