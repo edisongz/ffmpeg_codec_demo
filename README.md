@@ -1,3 +1,3 @@
 # ffmpeg_codec_demo
-### 1,iOS soft and hardware h.264 stream decoder
-### 2,use ffmpeg to split video demo.
+#### 1，iOS 软硬解码H.264格式视频；
+#### 2，用ffmpeg合并两个尺寸和格式都相同的视频；
