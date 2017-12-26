@@ -90,20 +90,17 @@
 //    NSLog(@"outpath = %@", outfilePath);
 //    [_videoSplitter splitVideoWithInFilename:path outpath:outfilePath splitSec:10];
     
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        __strong typeof(weakSelf) sself = weakSelf;
-        if (!sself) {
-            return ;
-        }
-        
-        NSString *path1 = [[NSBundle mainBundle] pathForResource:@"sintel" ofType:@"mp4"];
-        NSString *outfilePath1 = [docDir stringByAppendingFormat:@"/merged_file.mp4"];
-        NSLog(@"%@", outfilePath1);
-        
-        sself.videoMerger = [[FFmpegVideoMergeUtil alloc] init];
-        [sself.videoMerger merge_video:path1 input_file2:path1 output_file:outfilePath1];
-    });
+    NSString *path1 = [[NSBundle mainBundle] pathForResource:@"sintel" ofType:@"mp4"];
+    NSString *outfilePath1 = [docDir stringByAppendingFormat:@"/merged_file.mp4"];
+    
+    self.videoMerger = [[FFmpegVideoMergeUtil alloc] init];
+//    [self.videoMerger merge_video:path1 input_file2:path1 output_file:outfilePath1 completion:^(NSString *rroutputPath) {
+//        NSLog(@"%@", rroutputPath);
+//    }];
+    NSArray *paths11 = @[path1, path1, path1];
+    [self.videoMerger merge_videos:paths11 output_file:outfilePath1 completion:^(NSString *resoutputPath) {
+        NSLog(@"%@", resoutputPath);
+    }];
 }
 
 - (void)videoDecoder:(id)decoder pixelBuffer:(CVPixelBufferRef)pixelBuffer {

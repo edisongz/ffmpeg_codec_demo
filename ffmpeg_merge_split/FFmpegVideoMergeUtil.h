@@ -8,17 +8,19 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^MergeCompletionBlock)(NSString *outputPath);
+
 @interface FFmpegVideoMergeUtil : NSObject
+
 /**
- 合并两个视频
+ 合并多个视频
  
  iOS 自带AVComposition，更方便
 
- @param input_file1 视频1
- @param input_file2 视频2
- @param output_file 合并输出视频
+ @param paths 视频存储地址
+ @param output_file 输出文件
+ @param completion 回调
  */
-- (void)merge_video:(NSString *)input_file1 input_file2:(NSString *)input_file2 output_file:(NSString *)output_file;
-
+- (void)merge_videos:(NSArray<NSString *> *)paths output_file:(NSString *)output_file completion:(MergeCompletionBlock)completion;
 
 @end
